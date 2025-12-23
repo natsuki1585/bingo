@@ -119,3 +119,4 @@ resetBtn.addEventListener("click", resetMarks);
 
 // 初期表示
 makeNewCard();
+
