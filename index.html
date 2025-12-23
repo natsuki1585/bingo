@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bingo</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1>ビンゴ</h1>
+      <p id="status" class="status">カードを作成しました。</p>
+    </header>
+
+    <section id="grid" class="grid" aria-label="ビンゴカード"></section>
+
+    <div class="actions">
+      <button id="newCard" class="btn">新しいカード</button>
+      <button id="reset" class="btn btn-sub">リセット</button>
+    </div>
+
+    <small class="note">中央はFREE（最初からマーク済み）</small>
+  </main>
+
+  <script src="./script.js"></script>
+</body>
+</html>
