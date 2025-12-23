@@ -83,20 +83,44 @@ function countBingosAndWinners() {
   return winners; // array of lines
 }
 
+function analyzeLines() {
+  const winningLines = [];
+  let reachCount = 0;
+
+  for (const line of LINES) {
+    const markedCount = line.reduce((acc, i) => acc + (card[i].marked ? 1 : 0), 0);
+
+    if (markedCount === SIZE) {
+      winningLines.push(line);
+    } else if (markedCount === SIZE - 1) {
+      // 4/5 でリーチ（FREE込みでOK）
+      reachCount++;
+    }
+  }
+
+  return { winningLines, reachCount };
+}
+
 function updateBingo() {
   // win強調を一旦消す
   const btns = [...gridEl.querySelectorAll(".cell")];
   btns.forEach(b => b.classList.remove("win"));
 
-  const winners = countBingosAndWinners();
-  winners.flat().forEach(i => btns[i]?.classList.add("win"));
+  const { winningLines, reachCount } = analyzeLines();
 
-  if (winners.length === 0) {
-    statusEl.textContent = "ビンゴはまだです。";
+  // ビンゴラインを強調
+  winningLines.flat().forEach(i => btns[i]?.classList.add("win"));
+
+  // 表示切替（「ビンゴはまだです」は残す）
+  if (winningLines.length > 0) {
+    statusEl.textContent = `🎉 ビンゴ！ ${winningLines.length} 本`;
+  } else if (reachCount > 0) {
+    statusEl.textContent = `🔥 リーチ！ ${reachCount} 本`;
   } else {
-    statusEl.textContent = `🎉 ビンゴ！ ${winners.length} 本`;
+    statusEl.textContent = "ビンゴはまだです。";
   }
 }
+
 
 function render() {
   gridEl.innerHTML = "";
