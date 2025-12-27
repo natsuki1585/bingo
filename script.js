@@ -114,10 +114,10 @@ function updateBingo() {
   // 表示切替（「ビンゴはまだです」は残す）
   if (winningLines.length > 0) {
     statusEl.textContent = `🎉 ビンゴ！ ${winningLines.length} 本`;
-  } else if (reachCount > 0) {
+    } else if (reachCount > 0) {
     statusEl.textContent = `🔥 リーチ！ ${reachCount} 本`;
-  } else {
-    statusEl.textContent = "ビンゴはまだです。";
+    } else {
+    statusEl.textContent = "No Bingo";
   }
 }
 
