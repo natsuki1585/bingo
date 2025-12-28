@@ -1,8 +1,27 @@
 :root { --gap: 10px; }
 
 * { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
-.app { max-width: 560px; margin: 0 auto; padding: 16px; }
+body { margin: 0; 
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif; 
+
+    background-image:
+    linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.55)),
+    url("./assets/galaxy.jpeg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+  }
+
+
+.app { 
+    max-width: 560px; 
+    margin: 0 auto; 
+    padding: 16px; 
+
+    background: rgba(255,255,255,0.92);
+    border-radius: 20px;
+}
 
 .header { 
     display: grid;
