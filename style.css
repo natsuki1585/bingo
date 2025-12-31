@@ -10,8 +10,7 @@ body { margin: 0;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-
-  }
+ }
 
 
 .app { 
@@ -29,16 +28,17 @@ body { margin: 0;
     margin-bottom: 12px;
     justify-items: center; 
     text-align: center;
-  }
+}
 
 h1 { 
     margin: 0; 
     font-size: 28px; 
-  }
+}
 
 .status { 
     margin: 0; 
-    opacity: 0.8; }
+    opacity: 0.8; 
+}
 
 .grid {
     display: grid;
@@ -67,19 +67,39 @@ h1 {
 }
 
 .cell.win {
-  outline: 3px solid #22c55e;
-  outline-offset: 2px;
+    outline: 3px solid #22c55e;
+    outline-offset: 2px;
 }
 
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
 .btn {
-  padding: 14px 12px;
-  border: none;
-  border-radius: 14px;
-  background: #2563eb;
-  color: #fff;
-  font-weight: 800;
-  font-size: 16px;
+    padding: 14px 12px;
+    border: none;
+    border-radius: 14px;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 800;
+    font-size: 16px;
 }
-.btn-sub { background: #6b7280; }
-.note { display: block; margin-top: 10px; opacity: 0.7; }
+
+.btn-sub { 
+    background: #6b7280; 
+}
+
+.note { 
+    display: block; 
+    margin-top: 10px; 
+    opacity: 0.7; 
+}
+
+.draw { display: grid; gap: 10px; margin-bottom: 12px; }
+.current {
+  font-size: 44px;
+  font-weight: 900;
+  text-align: center;
+  padding: 10px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.85);
+}
+.draw-actions { display: grid; grid-template-columns: 1fr; gap: 8px; }
+

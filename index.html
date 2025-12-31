@@ -1,11 +1,22 @@
 <!doctype html>
 <html lang="ja">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Bingo</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
+
+<section class="draw">
+  <div class="current" id="currentNumber">--</div>
+  <div class="draw-actions">
+    <button id="btnNext" class="btn">次の数字を引く</button>
+    <button id="btnPrev" class="btn btn-sub">一つ前に戻る</button>
+    <button id="btnReset" class="btn btn-sub">リセット</button>
+  </div>
+</section>
+
 <body>
   <main class="app">
     <header class="header">
