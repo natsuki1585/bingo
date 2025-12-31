@@ -1,13 +1,13 @@
-// server.js
-import { 
-    WebSocketServer 
-} from "ws";
-
-import http from "http";
+// server/server.js  （Node 18+ 推奨）
+const http = require("http");
+const fs = require("fs");
+const path = require("path");
+const { WebSocketServer } = require("ws");
 
 const PORT = process.env.PORT || 8080;
-const MIN = 1;
-const MAX = 80;
+
+// ---- bingo state
+const MIN = 1, MAX = 80;
 
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -16,34 +16,27 @@ function shuffle(arr) {
   }
   return arr;
 }
-
 function newDeck() {
-  const deck = Array.from({ length: MAX - MIN + 1 }, (_, i) => MIN + i);
-  return shuffle(deck);
+  return shuffle(Array.from({ length: MAX - MIN + 1 }, (_, i) => MIN + i));
 }
 
-// ---- game state (server is source of truth)
 let deck = newDeck();
-let index = 0;        // 0..80
-let current = null;   // number | null
+let index = 0;
+let current = null;
 
-function getDrawn() {
-  return deck.slice(0, index);
-}
-
-function getState() {
+function getState(extra = {}) {
   return {
     type: "state",
     index,
     current,
-    drawn: getDrawn(),
+    drawn: deck.slice(0, index),
     remaining: deck.length - index,
+    ...extra,
   };
 }
-
 function applyAction(action) {
   if (action === "next") {
-    if (index >= deck.length) return; // already finished
+    if (index >= deck.length) return;
     index += 1;
     current = deck[index - 1];
   } else if (action === "prev") {
@@ -57,65 +50,85 @@ function applyAction(action) {
   }
 }
 
-const server = http.createServer();
+// ---- static hosting (serve ../client)
+const clientDir = path.join(__dirname, "..", "client");
+
+function contentType(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  return ({
+    ".html": "text/html; charset=utf-8",
+    ".css": "text/css; charset=utf-8",
+    ".js": "application/javascript; charset=utf-8",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".webp": "image/webp",
+    ".svg": "image/svg+xml",
+  })[ext] || "application/octet-stream";
+}
+
+const server = http.createServer((req, res) => {
+  const urlPath = decodeURIComponent(req.url.split("?")[0]);
+  const safePath = urlPath === "/" ? "/index.html" : urlPath;
+
+  const filePath = path.join(clientDir, safePath);
+  if (!filePath.startsWith(clientDir)) {
+    res.writeHead(403); res.end("Forbidden"); return;
+  }
+
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      res.writeHead(404); res.end("Not found"); return;
+    }
+    res.writeHead(200, { "Content-Type": contentType(filePath) });
+    res.end(data);
+  });
+});
+
+// ---- websocket
 const wss = new WebSocketServer({ server });
 
-// （授業用の簡易ホスト制御）最初に接続した人だけ操作OK
 let hostClient = null;
 
 function broadcast(obj) {
   const msg = JSON.stringify(obj);
-  for (const client of wss.clients) {
-    if (client.readyState === 1) client.send(msg);
+  for (const c of wss.clients) {
+    if (c.readyState === 1) c.send(msg);
   }
 }
 
 wss.on("connection", (ws) => {
   if (!hostClient) hostClient = ws;
 
-  // 接続直後に現状を送る
-  ws.send(JSON.stringify({ ...getState(), isHost: ws === hostClient }));
+  ws.send(JSON.stringify(getState({ isHost: ws === hostClient })));
 
-  ws.on("message", (data) => {
+  ws.on("message", (buf) => {
     let msg;
-    try {
-      msg = JSON.parse(data.toString());
-    } catch {
-      return;
-    }
+    try { msg = JSON.parse(buf.toString()); } catch { return; }
+    if (msg.type !== "cmd") return;
+    if (ws !== hostClient) return; // host only
 
-    if (msg.type === "cmd") {
-      // ホスト以外は操作禁止
-      if (ws !== hostClient) return;
+    const action = msg.action;
+    if (!["next", "prev", "reset"].includes(action)) return;
 
-      const action = msg.action;
-      if (!["next", "prev", "reset"].includes(action)) return;
-
-      applyAction(action);
-      broadcast(getState());
-    }
+    applyAction(action);
+    broadcast(getState());
   });
 
   ws.on("close", () => {
-    if (ws === hostClient) {
-      // ホストが落ちたら、次に接続している人をホストにする
-      hostClient = null;
-      for (const client of wss.clients) {
-        if (client.readyState === 1) {
-          hostClient = client;
-          break;
-        }
-      }
-      // ホスト再通知（全員）
-      for (const client of wss.clients) {
-        if (client.readyState === 1) {
-          client.send(JSON.stringify({ ...getState(), isHost: client === hostClient }));
-        }
-      }
+    if (ws !== hostClient) return;
+
+    hostClient = null;
+    for (const c of wss.clients) {
+      if (c.readyState === 1) { hostClient = c; break; }
+    }
+    // 通知（全員）
+    for (const c of wss.clients) {
+      if (c.readyState === 1) c.send(JSON.stringify(getState({ isHost: c === hostClient })));
     }
   });
 });
 
 server.listen(PORT, () => {
-  console.log(`WebSocket server running on ws://localhost:${PORT}`);
+  console.log(`Open http://localhost:${PORT}`);
 });
