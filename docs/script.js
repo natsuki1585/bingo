@@ -15,7 +15,8 @@ const btnPrev = document.getElementById("btnPrev");
 const btnReset = document.getElementById("btnReset");
 
 // ローカル開発ならこれ
-const ws = new WebSocket("ws://${location.host}");
+const wsProto = location.protocol === "https:" ? "wss" : "ws";
+const ws = new WebSocket(`${wsProto}://${location.host}`);
 
 // Pages(https)に置くなら最終的に wss:// にする必要があります
 // 例：const ws = new WebSocket("wss://あなたのサーバードメイン");
